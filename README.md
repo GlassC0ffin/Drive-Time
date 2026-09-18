@@ -1,50 +1,102 @@
-# Reusable Studio Engine
+# Drive-Time
 
-A minimal, framework-free Canvas starter I reuse to begin every new
-build in this course — clean file structure, a docs ritual, and a
-tiny working sketch that proves the engine runs.
+Drive-Time is a focused driving-mode prototype designed to reduce phone distraction while a person is driving.
 
-## What it does
+## Purpose
 
-One signal (mouse X position) drives one parameter (radius), which
-drives one visible behavior: a ring that pulses faster the farther
-right the mouse moves. See `/docs/SYSTEM_CHARTER.md` for the full
-template definition.
+When a drive is active, the system limits access to distracting phone behavior while keeping only the most essential driving tools available:
+
+- Music
+- Maps/navigation
+- Calling
+- AI assistant
+
+The app is intentionally minimal. It does not shame the user, it does not surveil the user, and it does not manipulate the user. It uses clear friction instead.
+
+## What this prototype does
+
+This version demonstrates the core interaction loop:
+
+- IDLE
+- DRIVING
+- DISTRACTION
+- DRIVE_ENDED
+
+The user can:
+
+- start a drive
+- use allowed driving functions
+- attempt a restricted app
+- see a friction screen that asks them to return to driving
+- end the drive
+
+## Files
+
+- `main.js` — app state and screen flow
+- `src/input/input.js` — input handling and action forwarding
+- `src/canvas/` — unused in this prototype and kept for future visual or animation experiments
+- `docs/SYSTEM_CHARTER.md` — project constraints and behavior rules
+- `docs/ROADMAP.md` — development plan
+- `docs/PROMPTS.md` — AI prompt log and project rules
 
 ## Run locally
 
-Just open `index.html` in a browser — no build step required.
-
-If your browser blocks ES module imports over `file://`, run a
-simple local server from the project root instead:
+From the project root, run:
 
 ```bash
 python3 -m http.server 8000
-# then open http://localhost:8000
 ```
 
-## Deploy
+Then open:
 
-This project deploys with **[Cloudflare Pages / GitHub Pages — pick
-one]**:
+```text
+http://localhost:8000
+```
 
-- Framework preset: None
-- Build command: (blank)
-- Output directory: `/` (root)
+## Can this be an app on your phone?
 
-Every push to `main` updates the live link automatically.
+Yes, but there are two different versions:
 
-## How I use this to start projects
+1. Mobile web app / PWA
+   - It can be installed on a phone like an app
+   - It works well for a prototype and demo
+   - It can be saved to the home screen
 
-1. Copy this repo as the starting point for a new assignment.
-2. Rewrite `/docs/SYSTEM_CHARTER.md` first — intent, constraints,
-   tensions, taste vow — before writing any code.
-3. Follow `/docs/ROADMAP.md` step by step.
-4. Use `/docs/PROMPTS.md` as the only way I talk to Copilot, so AI
-   help stays inside my own constraints instead of replacing them.
-5. Log real direction changes in `/process/changelog.md` as I go.
+2. Native phone app
+   - This is the version that can better control phone behavior
+   - Android allows more real app-level restrictions and integrations
+   - iPhone is much more limited because Apple restricts deep app locking and app-to-app control
 
-## Links
+## Can it be linked to your phone apps?
 
-- GitHub template repo: [add link]
-- Live deployed engine: [add link]
+Partially.
+
+- On Android, it can open apps like Maps, Music, Phone, and Assistant through platform APIs or intents.
+- On iPhone, linking to native apps is heavily limited by Apple’s sandboxing and app restrictions.
+- A full lock-screen or allowlist system is much more realistic as a native app rather than a browser app.
+
+So the best path is:
+
+- prototype in the browser first
+- native Android app next for real driving-mode restrictions
+- iPhone support as limited, focus-based behavior rather than full phone locking
+
+## Behavior integrity
+
+This project keeps the feature set narrow and intentional:
+
+- one clear purpose: reduce distracted phone use while driving
+- only essential functions remain available
+- no shaming or surveillance
+- intentional friction instead of hidden manipulation
+
+## Next steps
+
+Future improvements could include:
+
+- real GPS speed detection
+- emergency override button
+- allowed contacts and emergency calls
+- app allowlist for Android
+- full native mobile build
+- PWA install support and icon setup
