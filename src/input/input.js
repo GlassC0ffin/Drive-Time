@@ -1,19 +1,24 @@
 // input.js
-// Job: capture raw signals from the browser and expose them as simple
-// getters. Nothing in here knows about radius, pulses, or drawing —
-// it only knows about the mouse.
+// Job: capture user interactions and pass them to the state layer.
+// This file only listens for raw actions and forwards them.
 
-export function setupInput() {
-  let x = window.innerWidth / 2;
-  let y = window.innerHeight / 2;
+export function setupInput({ onAction }) {
+  function handleClick(event) {
+    const actionEl = event.target.closest("[data-action]");
 
-  window.addEventListener("mousemove", (e) => {
-    x = e.clientX;
-    y = e.clientY;
-  });
+    if (!actionEl) {
+      return;
+    }
+
+    const action = actionEl.dataset.action;
+    const value = actionEl.dataset.value || null;
+
+    onAction(action, value);
+  }
 
   return {
-    getX: () => x,
-    getY: () => y,
+    attachActionHandlers(root) {
+      root.addEventListener("click", handleClick);
+    },
   };
 }
