@@ -280,3 +280,62 @@ This is the smallest realistic Android MVP for the app.
 The best first version is an Android-first app with four safe widgets, a friction screen for restricted apps, emergency contact access, and a manual start/end drive flow supported by motion-based detection.
 
 This keeps the app practical, aligned with the device you are using, and consistent with the project charter.
+
+## Android app file structure
+
+For the real Android implementation, the app should be organized like this:
+
+- app/
+  - MainActivity
+  - DriveModeActivity
+  - FrictionActivity
+  - EmergencyActivity
+  - SettingsActivity
+
+- data/
+  - AppSettings
+  - ContactRepository
+  - RestrictedAppsRepository
+
+- logic/
+  - DriveStateManager
+  - AppRestrictionChecker
+  - DrivingDetector
+  - EmergencyContactService
+
+- ui/
+  - HomeScreen
+  - DrivingScreen
+  - FrictionScreen
+  - EmergencyScreen
+
+### Responsibility split
+
+MainActivity
+- boots the app and handles startup flow
+
+DriveModeActivity
+- shows the safe four-widget home while driving
+
+FrictionActivity
+- handles restricted app attempts and redirects the user to safe choices
+
+EmergencyActivity
+- lets the user access emergency contacts or emergency call flows
+
+SettingsActivity
+- holds allowed apps, restricted app list, emergency contacts, and preferences
+
+DriveStateManager
+- stores the current app state: IDLE, DRIVING, DISTRACTION, DRIVE_ENDED
+
+AppRestrictionChecker
+- decides whether an app is allowed or blocked while driving
+
+DrivingDetector
+- detects motion, vehicle use, or manual activation signals
+
+EmergencyContactService
+- pulls the user's trusted contacts and handles safe calls
+
+This separation keeps the code organized and matches the system charter's one-job-per-file principle.
