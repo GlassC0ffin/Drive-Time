@@ -1,0 +1,16 @@
+R_DEF: Internal format may change without notice
+local
+id assistantButton
+id callButton
+id endDriveButton
+id mapsButton
+id musicButton
+id restrictedAccessButton
+id safeHomeButton
+id startDriveButton
+id statusText
+id titleText
+layout activity_main
+mipmap ic_launcher
+string app_name
+style Theme.DriveTime

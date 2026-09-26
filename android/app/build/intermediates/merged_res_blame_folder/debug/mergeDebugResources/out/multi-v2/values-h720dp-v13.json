@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.drivetime.app-mergeDebugResources-56:/values-h720dp-v13/values-h720dp-v13.xml",
+            "map": [
+                {
+                    "source": "/Users/dortegagonzales28/.gradle/caches/9.3.0/transforms/0f176612a38194458aa2715248c8d7b3/transformed/appcompat-1.6.1/res/values-h720dp-v13/values-h720dp-v13.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "66",
+                        "endOffsets": "117"
+                    }
+                }
+            ]
+        }
+    ]
+}

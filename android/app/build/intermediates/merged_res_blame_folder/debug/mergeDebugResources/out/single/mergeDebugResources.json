@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.drivetime.app-debug-58:/layout_activity_main.xml.flat",
+        "source": "com.drivetime.app-main-60:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.drivetime.app-debug-58:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.drivetime.app-main-60:/mipmap-anydpi-v26/ic_launcher.xml"
+    }
+]

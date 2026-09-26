@@ -1,133 +1,160 @@
 package com.drivetime
 
 import android.os.Bundle
-import android.view.View
-import android.widget.Button
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-class MainActivity : AppCompatActivity() {
-    private lateinit var titleText: TextView
-    private lateinit var statusText: TextView
-    private lateinit var startDriveButton: Button
-    private lateinit var musicButton: Button
-    private lateinit var mapsButton: Button
-    private lateinit var callButton: Button
-    private lateinit var assistantButton: Button
-    private lateinit var restrictedAccessButton: Button
-    private lateinit var safeHomeButton: Button
-    private lateinit var endDriveButton: Button
-
-    private val driveStateManager = DriveStateManager()
-
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        titleText = findViewById(R.id.titleText)
-        statusText = findViewById(R.id.statusText)
-        startDriveButton = findViewById(R.id.startDriveButton)
-        musicButton = findViewById(R.id.musicButton)
-        mapsButton = findViewById(R.id.mapsButton)
-        callButton = findViewById(R.id.callButton)
-        assistantButton = findViewById(R.id.assistantButton)
-        restrictedAccessButton = findViewById(R.id.restrictedAccessButton)
-        safeHomeButton = findViewById(R.id.safeHomeButton)
-        endDriveButton = findViewById(R.id.endDriveButton)
-
-        startDriveButton.setOnClickListener {
-            driveStateManager.startDrive()
-            updateUi()
-        }
-
-        musicButton.setOnClickListener {
-            statusText.text = "Opening music controls."
-        }
-
-        mapsButton.setOnClickListener {
-            statusText.text = "Opening navigation."
-        }
-
-        callButton.setOnClickListener {
-            statusText.text = "Opening call options."
-        }
-
-        assistantButton.setOnClickListener {
-            statusText.text = "Opening AI assistant."
-        }
-
-        restrictedAccessButton.setOnClickListener {
-            driveStateManager.onRestrictedAppAttempt()
-            updateUi()
-        }
-
-        safeHomeButton.setOnClickListener {
-            driveStateManager.startDrive()
-            updateUi()
-        }
-
-        endDriveButton.setOnClickListener {
-            driveStateManager.endDrive()
-            updateUi()
-        }
-
-        driveStateManager.reset()
-        updateUi()
-    }
-
-    private fun updateUi() {
-        when (driveStateManager.getState()) {
-            DriveState.IDLE -> {
-                titleText.text = "Drive-Time"
-                statusText.text = "Only essential tools stay available while driving."
-                startDriveButton.visibility = View.VISIBLE
-                musicButton.visibility = View.GONE
-                mapsButton.visibility = View.GONE
-                callButton.visibility = View.GONE
-                assistantButton.visibility = View.GONE
-                restrictedAccessButton.visibility = View.GONE
-                safeHomeButton.visibility = View.GONE
-                endDriveButton.visibility = View.GONE
-            }
-
-            DriveState.DRIVING -> {
-                titleText.text = "Driving Mode Active"
-                statusText.text = "Use only the safe driving tools."
-                startDriveButton.visibility = View.GONE
-                musicButton.visibility = View.VISIBLE
-                mapsButton.visibility = View.VISIBLE
-                callButton.visibility = View.VISIBLE
-                assistantButton.visibility = View.VISIBLE
-                restrictedAccessButton.visibility = View.VISIBLE
-                safeHomeButton.visibility = View.GONE
-                endDriveButton.visibility = View.VISIBLE
-            }
-
-            DriveState.DISTRACTION -> {
-                titleText.text = "You should be driving."
-                statusText.text = "Choose a safe option below."
-                startDriveButton.visibility = View.GONE
-                musicButton.visibility = View.VISIBLE
-                mapsButton.visibility = View.VISIBLE
-                callButton.visibility = View.GONE
-                assistantButton.visibility = View.VISIBLE
-                restrictedAccessButton.visibility = View.GONE
-                safeHomeButton.visibility = View.VISIBLE
-                endDriveButton.visibility = View.VISIBLE
-            }
-
-            DriveState.DRIVE_ENDED -> {
-                titleText.text = "Drive ended"
-                statusText.text = "Your session is over. Start again when you are ready."
-                startDriveButton.visibility = View.VISIBLE
-                musicButton.visibility = View.GONE
-                mapsButton.visibility = View.GONE
-                callButton.visibility = View.GONE
-                assistantButton.visibility = View.GONE
-                restrictedAccessButton.visibility = View.GONE
-                safeHomeButton.visibility = View.GONE
-                endDriveButton.visibility = View.GONE
+        setContent {
+            DriveTimeTheme {
+                DriveTimeApp()
             }
         }
     }
+}
+
+@Composable
+fun DriveTimeApp() {
+    val stateManager = remember { DriveStateManager() }
+    var driveState by remember { mutableStateOf(DriveState.IDLE) }
+
+    fun updateState(state: DriveState) {
+        driveState = state
+        stateManager.setState(state)
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF111827)),
+        color = Color(0xFF111827)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Top
+        ) {
+            Text(
+                text = when (driveState) {
+                    DriveState.IDLE -> "Drive-Time"
+                    DriveState.DRIVING -> "Driving Mode Active"
+                    DriveState.DISTRACTION -> "You should be driving."
+                    DriveState.DRIVE_ENDED -> "Drive ended"
+                },
+                color = Color.White,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = when (driveState) {
+                    DriveState.IDLE -> "Only essential tools stay available while driving."
+                    DriveState.DRIVING -> "Use only the safe driving tools."
+                    DriveState.DISTRACTION -> "Choose a safe option below."
+                    DriveState.DRIVE_ENDED -> "Your session is over. Start again when you are ready."
+                },
+                color = Color(0xFFD1D5DB),
+                fontSize = 18.sp
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            if (driveState == DriveState.IDLE) {
+                Button(
+                    onClick = { updateState(DriveState.DRIVING) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Start Drive")
+                }
+            }
+
+            if (driveState == DriveState.DRIVING || driveState == DriveState.DISTRACTION) {
+                listOf("Music", "Maps", "Call", "AI Assistant").forEach { action ->
+                    Button(
+                        onClick = { },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    ) {
+                        Text(action)
+                    }
+                }
+
+                if (driveState == DriveState.DISTRACTION) {
+                    Button(
+                        onClick = { updateState(DriveState.DRIVING) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    ) {
+                        Text("Return to Safe Home")
+                    }
+                }
+
+                Button(
+                    onClick = { updateState(DriveState.DRIVE_ENDED) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                ) {
+                    Text("End Drive")
+                }
+            }
+
+            if (driveState == DriveState.DRIVE_ENDED) {
+                Button(
+                    onClick = { updateState(DriveState.IDLE) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Start Again")
+                }
+            }
+
+            if (driveState == DriveState.DRIVING) {
+                Button(
+                    onClick = { updateState(DriveState.DISTRACTION) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp)
+                ) {
+                    Text("Open Restricted App")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DriveTimeTheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = MaterialTheme.colorScheme,
+        content = content
+    )
 }
