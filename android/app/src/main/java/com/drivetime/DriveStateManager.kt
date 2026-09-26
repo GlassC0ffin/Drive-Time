@@ -19,5 +19,11 @@ class DriveStateManager {
         currentState = DriveState.IDLE
     }
 
+    fun setState(state: DriveState) {
+        currentState = state
+    }
+
     fun getState(): DriveState = currentState
+
+    fun isDriving(): Boolean = currentState == DriveState.DRIVING
 }
