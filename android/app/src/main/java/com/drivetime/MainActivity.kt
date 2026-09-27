@@ -195,13 +195,61 @@ fun DriveTimeApp() {
                 }
 
                 if (driveState == DriveState.DRIVING) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color(0xFF101D34),
+                        shape = RoundedCornerShape(22.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, border)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Now playing",
+                                    color = faded,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = 0.8.sp
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Ariana Grande · 2:14",
+                                    color = textPrimary,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(accent),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "▶",
+                                    color = Color(0xFF0B1020),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         DashboardTile(
                             title = "Music",
-                            subtitle = "Ariana Grande · 2:14",
+                            subtitle = "Queue · 2 tracks",
                             actionText = "Play",
                             accentColor = accent,
                             modifier = Modifier.weight(1f),
@@ -225,7 +273,7 @@ fun DriveTimeApp() {
                     ) {
                         DashboardTile(
                             title = "Assistant",
-                            subtitle = """"Say: call mom""",
+                            subtitle = """"Call mom""",
                             actionText = "Ask",
                             accentColor = accent,
                             modifier = Modifier.weight(1f),
@@ -378,16 +426,18 @@ private fun DashboardTile(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    Button(
+    Surface(
         onClick = onClick,
         modifier = modifier
-            .height(140.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF192843)),
+            .height(146.dp),
+        color = Color(0xFF18263F),
         shape = RoundedCornerShape(22.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(14.dp)
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x6A7DD3FC))
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(14.dp),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.Start
         ) {
