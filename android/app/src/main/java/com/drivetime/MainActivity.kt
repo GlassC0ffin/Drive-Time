@@ -77,24 +77,47 @@ fun DriveTimeApp() {
         } else null
 
         val intent = when {
-            resolvedPackage != null -> context.packageManager.getLaunchIntentForPackage(resolvedPackage)
+            resolvedPackage != null -> {
+                val launchIntent = context.packageManager.getLaunchIntentForPackage(resolvedPackage)
+                if (launchIntent != null) {
+                    launchIntent
+                } else {
+                    Intent(Intent.ACTION_VIEW).apply {
+                        setPackage(resolvedPackage)
+                        data = uri ?: when (resolvedPackage) {
+                            "com.spotify.music" -> Uri.parse("spotify:")
+                            "com.google.android.apps.maps" -> Uri.parse("geo:0,0?q=home")
+                            "com.google.android.apps.googleassistant" -> Uri.parse("https://www.google.com")
+                            else -> null
+                        }
+                    }
+                }
+            }
             uri != null -> Intent(Intent.ACTION_VIEW, uri)
             action != null -> Intent(action)
             else -> null
         }
 
-        if (intent == null && action == null && packageName != null) {
+        if (intent == null) {
+            if (action == null && packageName != null) {
+                val fallbackIntent = Intent(Intent.ACTION_VIEW).apply {
+                    data = Uri.parse("market://details?id=$packageName")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(fallbackIntent)
+            }
+            return
+        }
+
+        if (intent.resolveActivity(context.packageManager) != null) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        } else if (packageName != null) {
             val fallbackIntent = Intent(Intent.ACTION_VIEW).apply {
                 data = Uri.parse("market://details?id=$packageName")
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(fallbackIntent)
-            return
-        }
-
-        if (intent != null) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
         }
     }
 
