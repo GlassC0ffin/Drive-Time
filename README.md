@@ -90,6 +90,18 @@ This project keeps the feature set narrow and intentional:
 - no shaming or surveillance
 - intentional friction instead of hidden manipulation
 
+## Current status
+
+This project is now at the demo-ready Android dashboard milestone.
+
+Completed:
+
+- safe driving dashboard with music, maps, assistant, and call widgets
+- friction flow for restricted apps while driving
+- emergency contact access and safe fallback actions
+- settings/default drive configuration
+- final roadmap and documentation pass for Phase 12 and Phase 13
+
 ## Next steps
 
 Future improvements could include:

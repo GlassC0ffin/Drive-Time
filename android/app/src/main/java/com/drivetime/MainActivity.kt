@@ -56,37 +56,85 @@ class MainActivity : ComponentActivity() {
 fun DriveTimeApp() {
     val context = LocalContext.current
     val stateManager = remember { DriveStateManager() }
+    val frictionController = remember { FrictionController() }
+    val emergencyService = remember { EmergencyContactService() }
+    val emergencyContacts = remember { emergencyService.getEmergencyContacts() }
     var driveState by remember { mutableStateOf(DriveState.IDLE) }
+    var settings by remember { mutableStateOf(DriveSettings()) }
+    var showSettings by remember { mutableStateOf(false) }
 
     fun updateState(state: DriveState) {
         driveState = state
         stateManager.setState(state)
     }
 
-    fun launchApp(packageName: String?, uri: Uri? = null) {
-        val intent = if (packageName != null) {
-            context.packageManager.getLaunchIntentForPackage(packageName)
-        } else if (uri != null) {
-            Intent(Intent.ACTION_VIEW, uri)
-        } else {
-            null
+    val appLaunchResolver = remember { AppLaunchResolver() }
+
+    fun launchApp(packageName: String?, uri: Uri? = null, action: String? = null) {
+        val resolvedPackage = if (packageName != null) {
+            val installedPackages = context.packageManager.getInstalledApplications(0).map { it.packageName }.toSet()
+            appLaunchResolver.resolvePackage(listOf(packageName), installedPackages) ?: packageName
+        } else null
+
+        val intent = when {
+            resolvedPackage != null -> context.packageManager.getLaunchIntentForPackage(resolvedPackage)
+            uri != null -> Intent(Intent.ACTION_VIEW, uri)
+            action != null -> Intent(action)
+            else -> null
+        }
+
+        if (intent == null && action == null && packageName != null) {
+            val fallbackIntent = Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse("market://details?id=$packageName")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(fallbackIntent)
+            return
         }
 
         if (intent != null) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         }
     }
 
-    val bgStart = Color(0xFF070B17)
-    val bgEnd = Color(0xFF121A2E)
-    val surface = Color(0xFF111B2F)
-    val surfaceAlt = Color(0xFF192843)
-    val border = Color(0x6A7DD3FC)
-    val accent = Color(0xFF7DD3FC)
+    fun openMusic() {
+        val installedPackages = context.packageManager.getInstalledApplications(0).map { it.packageName }.toSet()
+        val packageName = appLaunchResolver.resolvePackage(appLaunchResolver.candidatesForMusic(), installedPackages)
+        launchApp(packageName)
+    }
+
+    fun openMaps() {
+        val installedPackages = context.packageManager.getInstalledApplications(0).map { it.packageName }.toSet()
+        val packageName = appLaunchResolver.resolvePackage(appLaunchResolver.candidatesForMaps(), installedPackages)
+        launchApp(packageName)
+    }
+
+    fun openAssistant() {
+        val installedPackages = context.packageManager.getInstalledApplications(0).map { it.packageName }.toSet()
+        val packageName = appLaunchResolver.resolvePackage(appLaunchResolver.candidatesForAssistant(), installedPackages)
+        launchApp(packageName)
+    }
+
+    fun callEmergency() {
+        val contact = emergencyContacts.firstOrNull()
+        if (contact != null) {
+            emergencyService.callEmergencyContact(context, contact)
+        } else {
+            launchApp(null, action = Intent.ACTION_DIAL)
+        }
+    }
+
+    val bgStart = Color(0xFF050B16)
+    val bgEnd = Color(0xFF121B39)
+    val surface = Color(0xFF101B2D)
+    val surfaceAlt = Color(0xFF162644)
+    val border = Color(0xFF7DD3FC)
+    val accent = Color(0xFF6EE7F9)
     val accent2 = Color(0xFFB794F4)
-    val accentWarm = Color(0xFFF59E0B)
-    val textPrimary = Color.White
-    val textSecondary = Color(0xFFBFCDE8)
+    val accentWarm = Color(0xFFFFB703)
+    val textPrimary = Color(0xFFF8FBFF)
+    val textSecondary = Color(0xFFB9C9E8)
     val faded = Color(0xFF8EA3C3)
 
     Surface(
@@ -115,7 +163,12 @@ fun DriveTimeApp() {
                         modifier = Modifier
                             .size(52.dp)
                             .clip(RoundedCornerShape(16.dp))
-                            .background(accentWarm),
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(accentWarm, accent2)
+                                )
+                            )
+                            .border(1.dp, accent, RoundedCornerShape(16.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -127,9 +180,9 @@ fun DriveTimeApp() {
                     }
 
                     Surface(
-                        color = Color(0xFF10213B),
+                        color = Color(0xFF0D1830),
                         shape = RoundedCornerShape(999.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, border)
+                        border = androidx.compose.foundation.BorderStroke(1.dp, accent)
                     ) {
                         Text(
                             text = when (driveState) {
@@ -140,6 +193,20 @@ fun DriveTimeApp() {
                             },
                             color = accent,
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    Button(
+                        onClick = { showSettings = !showSettings },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF111F39)),
+                        shape = RoundedCornerShape(999.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, border)
+                    ) {
+                        Text(
+                            text = "Settings",
+                            color = accent,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -160,6 +227,45 @@ fun DriveTimeApp() {
                     fontWeight = FontWeight.Bold
                 )
 
+                if (showSettings) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Surface(
+                        color = Color(0xFF111E35),
+                        shape = RoundedCornerShape(22.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, border),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(18.dp)
+                        ) {
+                            Text(
+                                text = "Drive settings",
+                                color = textPrimary,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            SettingsRow(label = "Music", value = settings.musicApp, labelColor = textSecondary, valueColor = textPrimary)
+                            SettingsRow(label = "Maps", value = settings.mapsApp, labelColor = textSecondary, valueColor = textPrimary)
+                            SettingsRow(label = "Assistant", value = settings.assistantApp, labelColor = textSecondary, valueColor = textPrimary)
+                            SettingsRow(label = "Emergency", value = settings.emergencyContacts.joinToString(", "), labelColor = textSecondary, valueColor = textPrimary)
+
+                            Spacer(modifier = Modifier.height(14.dp))
+                            Button(
+                                onClick = { showSettings = false },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = accent),
+                                shape = RoundedCornerShape(14.dp)
+                            ) {
+                                Text("Done", color = Color(0xFF0B1020), fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
@@ -174,20 +280,68 @@ fun DriveTimeApp() {
                     lineHeight = 22.sp
                 )
 
+                if (driveState == DriveState.DRIVING) {
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Surface(
+                        color = Color(0xFF101E35),
+                        shape = RoundedCornerShape(16.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, border),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Vehicle connected",
+                                color = textSecondary,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .background(Color(0xFF34D399), RoundedCornerShape(50))
+                                )
+                                Text(
+                                    text = "Live",
+                                    color = accent,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(20.dp))
 
                 if (driveState == DriveState.IDLE) {
                     Button(
-                        onClick = { updateState(DriveState.DRIVING) },
+                        onClick = {
+                            if (stateManager.canActivateDrive()) {
+                                stateManager.startDrive()
+                                updateState(stateManager.getState())
+                            }
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(62.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = accentWarm),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Brush.linearGradient(listOf(accent, accent2)).let { Color(0xFF6EE7F9) }
+                        ),
                         shape = RoundedCornerShape(18.dp)
                     ) {
                         Text(
                             text = "Start Drive",
-                            color = Color(0xFF111827),
+                            color = Color(0xFF0B1020),
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
@@ -228,7 +382,7 @@ fun DriveTimeApp() {
                                 modifier = Modifier
                                     .size(42.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(accent),
+                                    .background(Brush.linearGradient(listOf(accent, accent2))),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -253,7 +407,7 @@ fun DriveTimeApp() {
                             actionText = "Play",
                             accentColor = accent,
                             modifier = Modifier.weight(1f),
-                            onClick = { launchApp("com.spotify.music") }
+                            onClick = { openMusic() }
                         )
                         DashboardTile(
                             title = "Maps",
@@ -261,7 +415,7 @@ fun DriveTimeApp() {
                             actionText = "Nav",
                             accentColor = accent2,
                             modifier = Modifier.weight(1f),
-                            onClick = { launchApp("com.google.android.apps.maps") }
+                            onClick = { openMaps() }
                         )
                     }
 
@@ -285,8 +439,56 @@ fun DriveTimeApp() {
                             actionText = "Dial",
                             accentColor = accentWarm,
                             modifier = Modifier.weight(1f),
-                            onClick = { context.startActivity(Intent(Intent.ACTION_DIAL)) }
+                            onClick = {
+                                emergencyService.callEmergencyContact(context, emergencyContacts.first())
+                            }
                         )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color(0xFF101E35),
+                        shape = RoundedCornerShape(18.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, border)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp)
+                        ) {
+                            Text(
+                                text = "Emergency contacts",
+                                color = faded,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                emergencyContacts.forEach { contact ->
+                                    Surface(
+                                        onClick = {
+                                            emergencyService.callEmergencyContact(context, contact)
+                                        },
+                                        color = Color(0xFF18263F),
+                                        shape = RoundedCornerShape(12.dp),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, border)
+                                    ) {
+                                        Text(
+                                            text = contact.name,
+                                            color = textPrimary,
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(18.dp))
@@ -321,7 +523,11 @@ fun DriveTimeApp() {
                             }
 
                             Button(
-                                onClick = { updateState(DriveState.DRIVE_ENDED) },
+                                onClick = {
+                                    if (stateManager.confirmEndDrive()) {
+                                        updateState(stateManager.getState())
+                                    }
+                                },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF312E81)),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
@@ -343,7 +549,7 @@ fun DriveTimeApp() {
                             horizontalAlignment = Alignment.Start
                         ) {
                             Text(
-                                text = "You should be driving.",
+                                text = frictionController.getSafetyMessage(),
                                 color = textPrimary,
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold
@@ -367,7 +573,7 @@ fun DriveTimeApp() {
                                     actionText = "Open",
                                     accentColor = accent,
                                     modifier = Modifier.weight(1f),
-                                    onClick = { launchApp("com.spotify.music") }
+                                    onClick = { openMusic() }
                                 )
                                 DashboardTile(
                                     title = "Maps",
@@ -375,14 +581,17 @@ fun DriveTimeApp() {
                                     actionText = "Open",
                                     accentColor = accent2,
                                     modifier = Modifier.weight(1f),
-                                    onClick = { launchApp("com.google.android.apps.maps") }
+                                    onClick = { openMaps() }
                                 )
                             }
 
                             Spacer(modifier = Modifier.height(10.dp))
 
                             Button(
-                                onClick = { updateState(DriveState.DRIVING) },
+                                onClick = {
+                                    stateManager.setState(DriveState.DRIVING)
+                                    updateState(stateManager.getState())
+                                },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(52.dp),
@@ -397,7 +606,10 @@ fun DriveTimeApp() {
 
                 if (driveState == DriveState.DRIVE_ENDED) {
                     Button(
-                        onClick = { updateState(DriveState.IDLE) },
+                        onClick = {
+                            stateManager.reset()
+                            updateState(stateManager.getState())
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(64.dp),
@@ -418,6 +630,35 @@ fun DriveTimeApp() {
 }
 
 @Composable
+private fun SettingsRow(
+    label: String,
+    value: String,
+    labelColor: Color = Color(0xFFBFCDE8),
+    valueColor: Color = Color.White
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            color = labelColor,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium
+        )
+        Text(
+            text = value,
+            color = valueColor,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
 private fun DashboardTile(
     title: String,
     subtitle: String,
@@ -430,9 +671,9 @@ private fun DashboardTile(
         onClick = onClick,
         modifier = modifier
             .height(146.dp),
-        color = Color(0xFF18263F),
+        color = Color(0xFF13233D),
         shape = RoundedCornerShape(22.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x6A7DD3FC))
+        border = androidx.compose.foundation.BorderStroke(1.dp, accentColor)
     ) {
         Column(
             modifier = Modifier
