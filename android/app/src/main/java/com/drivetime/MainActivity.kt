@@ -5,9 +5,13 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -62,6 +67,12 @@ fun DriveTimeApp() {
     var driveState by remember { mutableStateOf(DriveState.IDLE) }
     var settings by remember { mutableStateOf(DriveSettings()) }
     var showSettings by remember { mutableStateOf(false) }
+    var vehicleConnected by remember { mutableStateOf(false) }
+    var activeWidget by remember { mutableStateOf<String?>(null) }
+    var mediaPlaying by remember { mutableStateOf(false) }
+
+    val mediaTitle = "All They Wanted"
+    val mediaArtist = "Panchiko"
 
     fun updateState(state: DriveState) {
         driveState = state
@@ -122,21 +133,38 @@ fun DriveTimeApp() {
     }
 
     fun openMusic() {
-        val installedPackages = context.packageManager.getInstalledApplications(0).map { it.packageName }.toSet()
-        val packageName = appLaunchResolver.resolvePackage(appLaunchResolver.candidatesForMusic(), installedPackages)
-        launchApp(packageName)
+        activeWidget = "music"
     }
 
     fun openMaps() {
-        val installedPackages = context.packageManager.getInstalledApplications(0).map { it.packageName }.toSet()
-        val packageName = appLaunchResolver.resolvePackage(appLaunchResolver.candidatesForMaps(), installedPackages)
-        launchApp(packageName)
+        activeWidget = "maps"
     }
 
     fun openAssistant() {
+        activeWidget = "assistant"
+    }
+
+    fun openFullApp(widgetType: String) {
         val installedPackages = context.packageManager.getInstalledApplications(0).map { it.packageName }.toSet()
-        val packageName = appLaunchResolver.resolvePackage(appLaunchResolver.candidatesForAssistant(), installedPackages)
-        launchApp(packageName)
+        val packageName = when (widgetType) {
+            "music" -> appLaunchResolver.resolvePackage(appLaunchResolver.candidatesForMusic(), installedPackages)
+            "maps" -> appLaunchResolver.resolvePackage(appLaunchResolver.candidatesForMaps(), installedPackages)
+            "assistant" -> appLaunchResolver.resolvePackage(appLaunchResolver.candidatesForAssistant(), installedPackages)
+            else -> null
+        }
+
+        when (widgetType) {
+            "music" -> if (packageName != null) launchApp(packageName)
+            "maps" -> if (packageName != null) launchApp(packageName)
+            "assistant" -> {
+                val assistIntent = Intent(Intent.ACTION_ASSIST).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                if (assistIntent.resolveActivity(context.packageManager) != null) {
+                    context.startActivity(assistIntent)
+                } else if (packageName != null) {
+                    launchApp(packageName)
+                }
+            }
+        }
     }
 
     fun callEmergency() {
@@ -186,11 +214,7 @@ fun DriveTimeApp() {
                         modifier = Modifier
                             .size(52.dp)
                             .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(accentWarm, accent2)
-                                )
-                            )
+                            .background(Brush.linearGradient(listOf(accentWarm, accent2)))
                             .border(1.dp, accent, RoundedCornerShape(16.dp)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -270,7 +294,6 @@ fun DriveTimeApp() {
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(12.dp))
-
                             SettingsRow(label = "Music", value = settings.musicApp, labelColor = textSecondary, valueColor = textPrimary)
                             SettingsRow(label = "Maps", value = settings.mapsApp, labelColor = textSecondary, valueColor = textPrimary)
                             SettingsRow(label = "Assistant", value = settings.assistantApp, labelColor = textSecondary, valueColor = textPrimary)
@@ -303,7 +326,7 @@ fun DriveTimeApp() {
                     lineHeight = 22.sp
                 )
 
-                if (driveState == DriveState.DRIVING) {
+                if (driveState == DriveState.DRIVING && vehicleConnected) {
                     Spacer(modifier = Modifier.height(14.dp))
                     Surface(
                         color = Color(0xFF101E35),
@@ -358,7 +381,7 @@ fun DriveTimeApp() {
                             .fillMaxWidth()
                             .height(62.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Brush.linearGradient(listOf(accent, accent2)).let { Color(0xFF6EE7F9) }
+                            containerColor = Color(0xFF6EE7F9)
                         ),
                         shape = RoundedCornerShape(18.dp)
                     ) {
@@ -372,53 +395,144 @@ fun DriveTimeApp() {
                 }
 
                 if (driveState == DriveState.DRIVING) {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = Color(0xFF101D34),
-                        shape = RoundedCornerShape(22.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, border)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 14.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                    if (activeWidget == "music" && mediaPlaying) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Color(0xFF101D34),
+                            shape = RoundedCornerShape(22.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, border)
                         ) {
-                            Column {
-                                Text(
-                                    text = "Now playing",
-                                    color = faded,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    letterSpacing = 0.8.sp
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "Ariana Grande · 2:14",
-                                    color = textPrimary,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                            Box(
+                            val infiniteTransition = rememberInfiniteTransition(label = "album-spin")
+                            val rotation by infiniteTransition.animateFloat(
+                                initialValue = 0f,
+                                targetValue = 360f,
+                                animationSpec = infiniteRepeatable(
+                                    animation = tween(14000, easing = LinearEasing)
+                                ),
+                                label = "spin"
+                            )
+
+                            Column(
                                 modifier = Modifier
-                                    .size(42.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Brush.linearGradient(listOf(accent, accent2))),
-                                contentAlignment = Alignment.Center
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
                             ) {
-                                Text(
-                                    text = "▶",
-                                    color = Color(0xFF0B1020),
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp
-                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column {
+                                        Text(
+                                            text = "Now playing",
+                                            color = faded,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            letterSpacing = 0.8.sp
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = "$mediaArtist · $mediaTitle",
+                                            color = textPrimary,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .size(46.dp)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .background(Brush.linearGradient(listOf(accent, accent2)))
+                                            .graphicsLayer { rotationZ = rotation },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "D",
+                                            color = Color(0xFF0B1020),
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 22.sp
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Button(
+                                        onClick = { mediaPlaying = !mediaPlaying },
+                                        modifier = Modifier.weight(1f),
+                                        colors = ButtonDefaults.buttonColors(containerColor = surfaceAlt),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Text(if (mediaPlaying) "Pause" else "Play", color = textPrimary)
+                                    }
+                                    Button(
+                                        onClick = { openFullApp("music") },
+                                        modifier = Modifier.weight(1f),
+                                        colors = ButtonDefaults.buttonColors(containerColor = accent),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Text("Open app", color = Color(0xFF0B1020), fontWeight = FontWeight.Bold)
+                                    }
+                                }
                             }
                         }
+                        Spacer(modifier = Modifier.height(14.dp))
                     }
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                    if (activeWidget == "maps") {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Color(0xFF101D34),
+                            shape = RoundedCornerShape(20.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, accent2)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Text("Maps", color = textPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                                Text("Home · 8 min", color = textSecondary, fontSize = 13.sp)
+                                Button(
+                                    onClick = { openFullApp("maps") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(containerColor = accent2),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text("Open maps", color = Color(0xFF0B1020), fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(14.dp))
+                    }
+
+                    if (activeWidget == "assistant") {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Color(0xFF101D34),
+                            shape = RoundedCornerShape(20.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, accent)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Text("Gemini assistant", color = textPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                                Text("Ready to help with calls, routes, and quick prompts.", color = textSecondary, fontSize = 13.sp)
+                                Button(
+                                    onClick = { openFullApp("assistant") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(containerColor = accent),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text("Launch assistant", color = Color(0xFF0B1020), fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(14.dp))
+                    }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -430,7 +544,7 @@ fun DriveTimeApp() {
                             actionText = "Play",
                             accentColor = accent,
                             modifier = Modifier.weight(1f),
-                            onClick = { openMusic() }
+                            onClick = { openMusic(); mediaPlaying = true }
                         )
                         DashboardTile(
                             title = "Maps",
@@ -450,11 +564,11 @@ fun DriveTimeApp() {
                     ) {
                         DashboardTile(
                             title = "Assistant",
-                            subtitle = """"Call mom""",
+                            subtitle = "Call mom",
                             actionText = "Ask",
                             accentColor = accent,
                             modifier = Modifier.weight(1f),
-                            onClick = { launchApp("com.google.android.apps.googleassistant") }
+                            onClick = { openAssistant() }
                         )
                         DashboardTile(
                             title = "Call",
@@ -692,8 +806,7 @@ private fun DashboardTile(
 ) {
     Surface(
         onClick = onClick,
-        modifier = modifier
-            .height(146.dp),
+        modifier = modifier.height(146.dp),
         color = Color(0xFF13233D),
         shape = RoundedCornerShape(22.dp),
         border = androidx.compose.foundation.BorderStroke(1.dp, accentColor)

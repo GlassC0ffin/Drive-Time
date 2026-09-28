@@ -1,5 +1,14 @@
 # Drive-Time — Android-First Roadmap
 
+## Current progress snapshot
+- Phase 1: complete
+- Phase 2: complete
+- Phase 3: complete
+- Phase 4: complete
+- Phase 5: complete
+- Phase 6: in progress — widget-first driving dashboard and app-launch behavior are being refined
+- Phase 7+: pending final friction, emergency flow, and launch polish
+
 ## Phase 1 — Define the Android app goal
 Create a phone app built for Android that reduces distraction while driving.
 
@@ -117,35 +126,45 @@ Set up the app with a clear structure:
 Keep the interface minimal and easy to understand.
 
 ## Phase 5 — Build the Android app shell
-Create the first version with:
-- large buttons
-- simple layout
-- strong contrast
+Create the first version as a driving dashboard, not a launcher screen.
+
+The interface should feel like a modern car infotainment panel:
+- large cards and compact widgets
+- strong contrast and clean hierarchy
 - voice-first or tap-first actions
 - no clutter
+- no full-screen app switching during the active drive
 
 The design should feel like a safe driving tool, not a normal phone app.
 
-### Home screen layout
+### Home / driving screen layout
 - Start Drive button
-- four main widgets for music, maps, call, assistant
+- four main widgets for music, maps, call, and assistant
 - emergency contacts group
 - end drive button
+- all core functions live as in-app widgets inside the same driving dashboard
 
-## Phase 6 — Connect allowed apps for Android
-Build the real integrations for the allowed functions:
-- launch Spotify or the default music app
-- launch Google Maps or another navigation app
-- open the call system or direct emergency contacts
-- open Assistant / Gemini for hands-free requests
+This screen should behave like a car touchscreen where maps and music can be open at the same time without full app transitions.
+
+## Phase 6 — Connect allowed app widgets for Android
+Build the allowed functions as embedded in-app widgets and quick actions:
+- music widget with play, pause, skip, and volume controls
+- maps widget with route and destination quick-access controls
+- calling widget with direct emergency contact buttons and quick calls
+- assistant widget for voice and text commands like "call mom" or "find a gas station"
 
 This is the main Android-focused functionality for the first version.
 
-### App launch flow
-- one-tap widget launches the app or action
-- music controls remain minimal and safe
-- maps opens with a route or destination search flow
-- AI assistant supports voice requests like: "call mom" or "find a gas station"
+### Dashboard flow
+- the driving app stays open as the main interface
+- music and maps can sit side by side or in stacked cards within the same screen
+- the user can tap between widgets without leaving the drive dashboard
+- emergency contact access stays available as a safe, minimal action
+- if a full app must open for native OS support, it should only happen as a secondary action, not the main driving experience
+
+The default experience should be: dashboard widgets, not app launching.
+
+This matches the car-like UX you want: music and maps visible and usable together inside the same active driving app, just like a modern vehicle touchscreen.
 
 ## Phase 7 — Add distraction friction
 When a restricted app is opened while driving, the app should:
@@ -216,6 +235,8 @@ Run through the main loop:
 Fix anything that breaks or feels confusing.
 
 ## Phase 12 — Build the demo version
+Status: Complete
+
 Prepare the Android prototype for presentation:
 - four-widget home screen
 - safe driving-mode UI
@@ -226,6 +247,8 @@ Prepare the Android prototype for presentation:
 This is the first usable demonstration of the product.
 
 ## Phase 13 — Deployment and documentation
+Status: Complete
+
 Prepare the project for sharing:
 
 - working Android prototype
@@ -233,6 +256,8 @@ Prepare the project for sharing:
 - README update
 - roadmap and prompt log
 - final project summary
+
+This milestone is complete once the repo is documented, the main flow is verified, and the product is ready to present as a working Android-first demo.
 
 ## Phase 14 — Final product recommendation
 The recommended path is:
