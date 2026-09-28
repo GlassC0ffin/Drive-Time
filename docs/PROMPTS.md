@@ -314,6 +314,12 @@ inside the rules already defined in `SYSTEM_CHARTER.md`.
 > Notes: Added the explicit project rule that every new prompt must include a timestamp with AM/PM, and that the newest prompt must be appended to the bottom of the log in chronological order.
 
 > Date: 2026-09-27
+> Time: 11:12 PM
+> Request: Show more app choices and more contact choices, and keep a commit for the app glitch/break state.
+> Prompt: "okay i lik eit but you should show more apps and show more contacts becasue there are far the little and make commit fro when the app broke or glitched okay"
+> Notes: The app list and contact list are expanded to show a more realistic set of common apps and contacts on the device. The project also keeps a separate commit history entry for the glitch/break period so the regression is preserved in git history.
+
+> Date: 2026-09-27
 > Time: 10:49 PM
 > Request: Finish the remaining roadmap work, install the final app update to the phone, and wrap up with a final commit.
 > Prompt: "yes do that finish everything that is left in the road map and update to my phone too let wrap this up and commits all the time it app gliched and broke too and do a final commit then you are done"

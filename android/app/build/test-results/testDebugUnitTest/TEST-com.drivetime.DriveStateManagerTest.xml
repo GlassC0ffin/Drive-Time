@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.drivetime.DriveStateManagerTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-09-28T05:29:03.597Z" hostname="Mac.localdomain" time="0.037">
+<testsuite name="com.drivetime.DriveStateManagerTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-09-28T05:44:43.006Z" hostname="Mac.localdomain" time="0.061">
   <properties/>
-  <testcase name="default drive settings include the core essentials" classname="com.drivetime.DriveStateManagerTest" time="0.013"/>
-  <testcase name="end drive confirmation only completes an active session" classname="com.drivetime.DriveStateManagerTest" time="0.001"/>
+  <testcase name="default drive settings include the core essentials" classname="com.drivetime.DriveStateManagerTest" time="0.02"/>
+  <testcase name="end drive confirmation only completes an active session" classname="com.drivetime.DriveStateManagerTest" time="0.0"/>
   <testcase name="forceExitDrive resets any active drive state back to idle" classname="com.drivetime.DriveStateManagerTest" time="0.0"/>
   <testcase name="endDrive transitions to drive ended state" classname="com.drivetime.DriveStateManagerTest" time="0.0"/>
   <testcase name="startDrive transitions to driving state" classname="com.drivetime.DriveStateManagerTest" time="0.0"/>
-  <testcase name="app launch resolver picks the first installed package from fallback options" classname="com.drivetime.DriveStateManagerTest" time="0.011"/>
-  <testcase name="friction safe actions use clear returning options" classname="com.drivetime.DriveStateManagerTest" time="0.001"/>
-  <testcase name="drive activation only starts from idle and blocks duplicate starts" classname="com.drivetime.DriveStateManagerTest" time="0.0"/>
+  <testcase name="app launch resolver picks the first installed package from fallback options" classname="com.drivetime.DriveStateManagerTest" time="0.018"/>
+  <testcase name="friction safe actions use clear returning options" classname="com.drivetime.DriveStateManagerTest" time="0.0"/>
+  <testcase name="drive activation only starts from idle and blocks duplicate starts" classname="com.drivetime.DriveStateManagerTest" time="0.001"/>
   <testcase name="restrictedAppAttempt transitions to distraction state" classname="com.drivetime.DriveStateManagerTest" time="0.0"/>
-  <testcase name="custom restricted app set is recognized by the checker" classname="com.drivetime.DriveStateManagerTest" time="0.008"/>
+  <testcase name="custom restricted app set is recognized by the checker" classname="com.drivetime.DriveStateManagerTest" time="0.016"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

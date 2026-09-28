@@ -23,7 +23,10 @@ class EmergencyContactService {
         return listOf(
             ContactModel("Mom", "+15550000001"),
             ContactModel("Dad", "+15550000002"),
-            ContactModel("Emergency", "+15550000003")
+            ContactModel("Family", "+15550000003"),
+            ContactModel("Aunt", "+15550000004"),
+            ContactModel("Uncle", "+15550000005"),
+            ContactModel("Emergency", "+15550000006")
         )
     }
 
@@ -53,7 +56,7 @@ class EmergencyContactService {
             }
         }
 
-        return result.take(6)
+        return result.take(12)
     }
 
     fun callEmergencyContact(context: Context, contact: ContactModel) {

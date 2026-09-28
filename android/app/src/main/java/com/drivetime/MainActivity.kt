@@ -481,6 +481,8 @@ fun DriveTimeApp() {
                                     "com.snapchat.android",
                                     "com.twitter.android",
                                     "com.facebook.katana",
+                                    "com.facebook.orca",
+                                    "com.whatsapp",
                                     "com.google.android.youtube",
                                     "com.android.chrome",
                                     "com.spotify.music",
@@ -492,7 +494,19 @@ fun DriveTimeApp() {
                                     "com.google.android.gm",
                                     "com.android.vending",
                                     "com.google.android.apps.nexuslauncher",
-                                    "com.google.android.apps.translate"
+                                    "com.google.android.apps.translate",
+                                    "com.linkedin.android",
+                                    "com.reddit.frontpage",
+                                    "com.discord",
+                                    "com.tiktok.android",
+                                    "com.pinterest",
+                                    "com.tencent.mm",
+                                    "org.telegram.messenger",
+                                    "com.android.settings",
+                                    "com.google.android.apps.messaging",
+                                    "com.google.android.apps.photos",
+                                    "com.google.android.apps.translate",
+                                    "com.google.android.apps.tachyon"
                                 )
 
                                 context.packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
@@ -504,6 +518,7 @@ fun DriveTimeApp() {
                                         packageName to label
                                     }
                                     .sortedBy { it.second.lowercase() }
+                                    .take(24)
                             }
 
                             installedApps.forEach { (appPackage, appLabel) ->
