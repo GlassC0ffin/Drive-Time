@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:2:1-20:12
-INJECTED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:2:1-20:12
-INJECTED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:2:1-20:12
-INJECTED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:2:1-20:12
+ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:2:1-32:12
+INJECTED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:2:1-32:12
+INJECTED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:2:1-32:12
+INJECTED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:2:1-32:12
 MERGED from [com.google.android.material:material:1.12.0] /Users/dortegagonzales28/.gradle/caches/9.3.0/transforms/843150b3d79472a947974857cf39ddcf/transformed/material-1.12.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] /Users/dortegagonzales28/.gradle/caches/9.3.0/transforms/ef29c85e391110e863dc3770f6de76a4/transformed/constraintlayout-2.0.1/AndroidManifest.xml:2:1-11:12
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /Users/dortegagonzales28/.gradle/caches/9.3.0/transforms/c86bdd07f2a4ed5603c48e4bbd4502d4/transformed/appcompat-resources-1.6.1/AndroidManifest.xml:17:1-22:12
@@ -78,13 +78,43 @@ MERGED from [androidx.arch.core:core-runtime:2.2.0] /Users/dortegagonzales28/.gr
 		INJECTED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml
 	android:versionName
 		INJECTED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml
+	xmlns:tools
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:3:5-51
 	android:versionCode
 		INJECTED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml
 	xmlns:android
 		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:2:11-69
+uses-permission#android.permission.READ_CONTACTS
+ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:5:5-72
+	android:name
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:5:22-69
+uses-permission#android.permission.QUERY_ALL_PACKAGES
+ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:6:5-7:53
+	tools:ignore
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:7:9-50
+	android:name
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:6:22-74
+queries
+ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:9:5-14:15
+package#com.spotify.music
+ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:10:9-53
+	android:name
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:10:18-50
+package#com.google.android.apps.maps
+ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:11:9-64
+	android:name
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:11:18-61
+package#com.google.android.apps.gsa.searchnow
+ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:12:9-73
+	android:name
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:12:18-70
+package#com.google.android.dialer
+ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:13:9-61
+	android:name
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:13:18-58
 application
-ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:4:5-18:19
-INJECTED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:4:5-18:19
+ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:16:5-30:19
+INJECTED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:16:5-30:19
 MERGED from [com.google.android.material:material:1.12.0] /Users/dortegagonzales28/.gradle/caches/9.3.0/transforms/843150b3d79472a947974857cf39ddcf/transformed/material-1.12.0/AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.12.0] /Users/dortegagonzales28/.gradle/caches/9.3.0/transforms/843150b3d79472a947974857cf39ddcf/transformed/material-1.12.0/AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] /Users/dortegagonzales28/.gradle/caches/9.3.0/transforms/ef29c85e391110e863dc3770f6de76a4/transformed/constraintlayout-2.0.1/AndroidManifest.xml:9:5-20
@@ -110,31 +140,31 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/dortegagonzales28/.g
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.13.1] /Users/dortegagonzales28/.gradle/caches/9.3.0/transforms/abeb515357a7db3fd22e844d1e55f2be/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:8:9-35
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:20:9-35
 	android:label
-		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:7:9-35
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:19:9-35
 	android:icon
-		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:6:9-43
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:18:9-43
 	android:allowBackup
-		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:5:9-35
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:17:9-35
 	android:theme
-		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:9:9-47
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:21:9-47
 activity#com.drivetime.MainActivity
-ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:10:9-17:20
+ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:22:9-29:20
 	android:exported
-		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:12:13-36
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:24:13-36
 	android:name
-		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:11:13-41
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:23:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:13:13-16:29
+ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:25:13-28:29
 action#android.intent.action.MAIN
-ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:14:17-69
+ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:26:17-69
 	android:name
-		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:14:25-66
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:26:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:15:17-77
+ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:27:17-77
 	android:name
-		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:15:27-74
+		ADDED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml:27:27-74
 uses-sdk
 INJECTED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /Users/dortegagonzales28/Drive-Time/android/app/src/main/AndroidManifest.xml

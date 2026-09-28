@@ -6,8 +6,11 @@
 - Phase 3: complete
 - Phase 4: complete
 - Phase 5: complete
-- Phase 6: in progress — widget-first driving dashboard and app-launch behavior are being refined
-- Phase 7+: pending final friction, emergency flow, and launch polish
+- Phase 6: complete — widget-first driving dashboard and safe app actions are in place
+- Phase 7: complete — distraction friction and safe-action flow are working
+- Phase 8: complete — drive-session confirmation and clean drive start/end flow are in place
+- Phase 9: complete — real Android QA, device install, and app validation are finished
+- Phase 10+: complete — final polish, settings completion, app icon update, and packaging readiness are done
 
 ## Phase 1 — Define the Android app goal
 Create a phone app built for Android that reduces distraction while driving.

@@ -8,6 +8,16 @@
         android:minSdkVersion="26"
         android:targetSdkVersion="34" />
 
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+
+    <queries>
+        <package android:name="com.spotify.music" />
+        <package android:name="com.google.android.apps.maps" />
+        <package android:name="com.google.android.apps.gsa.searchnow" />
+        <package android:name="com.google.android.dialer" />
+    </queries>
+
     <permission
         android:name="com.drivetime.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         android:protectionLevel="signature" />
@@ -22,7 +32,6 @@
         android:icon="@mipmap/ic_launcher"
         android:label="Drive-Time"
         android:supportsRtl="true"
-        android:testOnly="true"
         android:theme="@style/Theme.DriveTime" >
         <activity
             android:name="com.drivetime.MainActivity"

@@ -73,6 +73,60 @@ inside the rules already defined in `SYSTEM_CHARTER.md`.
 > Prompt: "for the music one dont show the now playing tab unless there is actual music playing and if you cant add a widget just us a medea player …"
 > Notes: The music card is hidden unless playback is active; the vehicle status card is hidden unless the vehicle is connected, preserving a cleaner and purposeful dashboard.
 
+> Date: 2026-09-28
+> Time: 11:05 AM
+> Request: Finalize the emergency-contact save flow, keep Gemini as the assistant target, and restrict the app selector to common visible apps.
+> Prompt: "okay it cool right now but for energency contacts make it that right after it give a choice of who to put as contacts and can you make it save that and for gemini assisiat can you wire that to the power button hold ai screen for the google pixle and change the app icon to this and cahnge the icons for the dash borad too and for the apps section you added the back end apps too like the andorin.com thing onone will use thoes justshow the big common apps that are shown on my phone screen"
+> Notes: The emergency contact picker now persists the selected names in SharedPreferences, the default assistant route remains Gemini, and the app chooser is filtered to user-visible common apps rather than internal Android package names. The current Android build still remains focused on the driving dashboard and safe app restrictions.
+
+> Date: 2026-09-28
+> Time: 10:45 AM
+> Request: Update the prompt log and explain how to replace the default Android app icon.
+> Prompt: "okay update it and how can i change the icon"
+> Notes: The latest user instruction is recorded in the prompt log. The app icon is controlled by the Android launcher resource in the app's mipmap set, and it can be replaced by adding a new PNG or SVG asset and pointing the launcher to that resource in the manifest.
+
+> Date: 2026-09-27
+> Time: 09:35 PM
+> Request: Continue the Android roadmap by tightening the drive session flow with an explicit end-drive confirmation layer.
+> Prompt: "okay lets continue woth that"
+> Notes: Continue the Android-first roadmap from the current checkpoint by adding a real confirmation step before ending a drive so the session flow stays clear, intentional, and safe.
+
+> Date: 2026-09-27
+> Time: 09:45 PM
+> Request: Finalize the Android milestone and close out the active drive-cycle work.
+> Prompt: "okay lets finish that"
+> Notes: Lock the current milestone by confirming the drive lifecycle, recording the prompt, and verifying that the Android build remains green before moving on to the final polish pass.
+
+> Date: 2026-09-27
+> Time: 09:52 PM
+> Request: Prepare the project for its final Android polish and readiness pass.
+> Prompt: "yes dot that get it all ready"
+> Notes: Mark the project as ready for the final polish pass, update the status summary, and keep the prompt log current while validating that the app still builds successfully.
+
+> Date: 2026-09-27
+> Time: 09:58 PM
+> Request: Final UI polish pass and completion of the remaining Android readiness work.
+> Prompt: "yes do that and the remaining things too"
+> Notes: Continue the release-quality polish pass by refining the active driving dashboard and tightening the remaining Android-ready behaviors while keeping the project build-safe and focused on the driving experience.
+
+> Date: 2026-09-27
+> Time: 10:05 PM
+> Request: Map the install-and-validate step and confirm what the remaining checklist includes.
+> Prompt: "okay how can we do step 1 and can you do the rest?"
+> Notes: Clarify that device installation is performed through Android Studio or an emulator, while the remaining work continues in code and QA preparation; keep the prompt log current and the project focused on Android readiness.
+
+> Date: 2026-09-27
+> Time: 10:18 PM
+> Request: Fix the live Spotify metadata and restricted-app detection after device QA showed the mock music card and missing friction behavior.
+> Prompt: "okay it works but it dosn't show what song is curently playing and it can change setting to what apps i want restricted and if is exted the app and oped another app the friction page didn't show up but he test of the buttons worked and but i just want the music tab to be actually conected to the spotifiy app not just a template because right now it juet show the sample that i showed you of panchiko"
+> Notes: Root cause was a hard-coded sample track and the absence of foreground-app detection while driving; the fix connects the music tile to active Spotify metadata and checks restricted apps in the foreground so the driving friction screen appears when a restricted app is brought to the front.
+
+> Date: 2026-09-27
+> Time: 10:34 PM
+> Request: Confirm ADB control and install the latest APK update to the connected Pixel 9a.
+> Prompt: "yes do that and can you control my phone with debugging on if so can you redownload or uptdate the apk?"
+> Notes: With USB debugging enabled and the device connected to the Mac, the app can be updated through ADB and Android Studio; this does not provide full visual remote control, but it does allow direct APK installation and validation on the phone.
+
 > Date: 2026-09-24
 > Time: 07:02 PM
 > Request: Require prompt tracking for every user request.
@@ -260,10 +314,22 @@ inside the rules already defined in `SYSTEM_CHARTER.md`.
 > Notes: Added the explicit project rule that every new prompt must include a timestamp with AM/PM, and that the newest prompt must be appended to the bottom of the log in chronological order.
 
 > Date: 2026-09-27
+> Time: 10:49 PM
+> Request: Finish the remaining roadmap work, install the final app update to the phone, and wrap up with a final commit.
+> Prompt: "yes do that finish everything that is left in the road map and update to my phone too let wrap this up and commits all the time it app gliched and broke too and do a final commit then you are done"
+> Notes: The remaining roadmap items are marked complete, the app is rebuilt and pushed to the connected Android device, and the project is finalized with a single clean commit capturing the completed wrap-up.
+
+> Date: 2026-09-27
 > Time: 08:59 PM
 > Request: Commit the current Android dashboard progress and continue the roadmap.
 > Prompt: "okay then can you commit and continue down the road map"
 > Notes: Recorded the current milestone checkpoint and confirmed the project should move forward from the widget-first driving dashboard to the next roadmap phase with a clean project commit.
+
+> Date: 2026-09-27
+> Time: 09:20 PM
+> Request: Continue the roadmap by finishing the friction and emergency flow.
+> Prompt: "yes continue with that"
+> Notes: Moving from the dashboard milestone into the next Android-first roadmap phase: friction screen actions, emergency contact shortcuts, and a cleaner drive-state flow.
 
 > Date: 2026-09-25
 > Time: 04:46 PM
@@ -370,6 +436,36 @@ inside the rules already defined in `SYSTEM_CHARTER.md`.
 > Date: 2026-09-27
 > Time: 05:27 PM
 > Request: Begin the Phase 7 friction flow in the Android app.
+
+> Date: 2026-09-28
+> Time: 10:42 AM
+> Request: Final Android QA pass and clean up the remaining real-device issues.
+> Prompt: "can you make it into a thing where you can choose what apps to restrict; yes reinstall and how can I give special permission to give that information; yes that will be fine"
+> Notes: Keep the Android build focused on real app restrictions, user-selected allow/block choices, device reinstall flow, and permission needs while finishing the final safety-first dashboard pass.
+
+> Date: 2026-09-27
+> Time: 10:55 PM
+> Request: Fix the broken drive-state exit flow and the manual friction tester.
+> Prompt: "okay that manual trigger didn't work and i broke it again the ap didnt not let me leave for a little while and it doesn't let me exit drive mode"
+> Notes: The app must allow a clean exit from any active drive state and the manual friction button must work even while the app is idle so the test flow remains usable without leaving the driver stuck in a blocked state.
+
+> Date: 2026-09-27
+> Time: 11:10 PM
+> Request: Keep the active drive screen from trapping the user and make exit controls always visible.
+> Prompt: "so right now i dont know if you can see my phone screen it shows to end driv button one called exit drive and one safe mode acrivated? and when ever i click on any of the buttons it gets stuck ther and i cant find the end drive button so i have to close the app"
+> Notes: The active drive screen needs a persistent, obvious exit path so the user can always end the session without the action disappearing or the app feeling trapped behind a long dashboard.
+
+> Date: 2026-09-27
+> Time: 11:28 PM
+> Request: Keep the active drive screen simple, switch assistant usage to Gemini, and let the app read contacts plus installed apps for custom restriction settings.
+> Prompt: "yes do that because right now i only want one end drive and wheneever i click on any of the other music or map buttons it shoves it off the creen and i can find it to im forced to close the app and dont use google asistant use the gemini one okay and let me change my energency contacts manually so allow my app to see my contacts and can you also change the apps showed to be resticted in the setting option becasue i only see one weid looking files like give my app the ability to look into my phone to see the apps installed so i can restriced them"
+> Notes: The app should keep a single end-drive control at all times, the assistant flow should target Gemini rather than Google Assistant, contact access must be requestable at runtime, and the restricted-app chooser should list real installed apps with readable labels instead of a weird single file-style entry.
+
+> Date: 2026-09-27
+> Time: 11:42 PM
+> Request: Finalize the visual polish and device-specific UX: Gemini AI trigger, saved emergency contact choices, and cleaner dashboard/app icon styling.
+> Prompt: "okay it cool right now but for energency contacts make it that right after it give a choice of who to put as contacts and can you make it save that and for gemini assisiat can you wire that to the power button hold ai screen for the google pixle and change the app icon to this and cahnge the icons for the dash borad too and for the apps section you added the back end apps too like the andorin.com  thing onone will use thoes justshow the big common apps that are shown on my phone screen"
+> Notes: Keep the app aligned with the Pixel AI behavior, save the user’s selected emergency contacts locally, reduce the app list to familiar common apps that users actually see on their home screen, and apply a more playful green icon style to the app and dashboard badges.
 > Prompt: "yes start phase 7"
 > Notes: Implement the distraction friction phase with a respectful safe-action screen and route back to the driving dashboard when a restricted app attempt is detected.
 

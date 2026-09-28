@@ -46,6 +46,19 @@ class DriveStateManagerTest {
     }
 
     @Test
+    fun `forceExitDrive resets any active drive state back to idle`() {
+        val manager = DriveStateManager()
+
+        manager.startDrive()
+        manager.forceExitDrive()
+        assertEquals(DriveState.IDLE, manager.getState())
+
+        manager.setState(DriveState.DISTRACTION)
+        manager.forceExitDrive()
+        assertEquals(DriveState.IDLE, manager.getState())
+    }
+
+    @Test
     fun `end drive confirmation only completes an active session`() {
         val manager = DriveStateManager()
 
@@ -61,7 +74,7 @@ class DriveStateManagerTest {
         val controller = FrictionController()
 
         assertEquals(
-            listOf("Music", "Maps", "Assistant", "Return to Safe Home", "End Drive"),
+            listOf("Music", "Maps", "Assistant", "Return to safe home", "End drive"),
             controller.getSafeActions()
         )
     }
@@ -72,8 +85,24 @@ class DriveStateManagerTest {
 
         assertEquals("Spotify", settings.musicApp)
         assertEquals("Google Maps", settings.mapsApp)
-        assertEquals("Google Assistant", settings.assistantApp)
+        assertEquals("Gemini", settings.assistantApp)
         assertEquals(listOf("Mom", "Dad"), settings.emergencyContacts)
+        assertEquals(listOf(
+            "com.instagram.android",
+            "com.zhiliao.musically",
+            "com.snapchat.android",
+            "com.twitter.android",
+            "com.facebook.katana"
+        ), settings.restrictedApps)
+    }
+
+    @Test
+    fun `custom restricted app set is recognized by the checker`() {
+        val checker = AppRestrictionChecker(setOf("com.instagram.android", "com.example.blocked"))
+
+        assertEquals(true, checker.isRestricted("com.instagram.android"))
+        assertEquals(true, checker.isRestricted("com.example.blocked"))
+        assertEquals(false, checker.isRestricted("com.google.android.apps.maps"))
     }
 
     @Test

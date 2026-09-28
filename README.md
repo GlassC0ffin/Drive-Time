@@ -92,7 +92,7 @@ This project keeps the feature set narrow and intentional:
 
 ## Current status
 
-This project is now at the demo-ready Android dashboard milestone.
+This project is now at the Android-first release-ready milestone.
 
 Completed:
 
@@ -100,15 +100,11 @@ Completed:
 - friction flow for restricted apps while driving
 - emergency contact access and safe fallback actions
 - settings/default drive configuration
-- final roadmap and documentation pass for Phase 12 and Phase 13
+- explicit end-drive confirmation flow and clean drive lifecycle handling
+- Android install and real device validation
+- final icon polish and launch resource cleanup
+- final roadmap and documentation pass for the current Android milestone
 
-## Next steps
+## Final wrap-up
 
-Future improvements could include:
-
-- real GPS speed detection
-- emergency override button
-- allowed contacts and emergency calls
-- app allowlist for Android
-- full native mobile build
-- PWA install support and icon setup
+This project has reached the end of the roadmap for the current Android-first phase. The remaining work is complete, the app is validated on the connected device, and the codebase is ready to be left in a stable, wrapped-up state.

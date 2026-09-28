@@ -16,6 +16,8 @@ class AppLaunchResolver {
     )
 
     fun candidatesForAssistant(): List<String> = listOf(
+        "com.google.android.apps.bard",
+        "com.google.android.apps.gemini",
         "com.google.android.apps.googleassistant",
         "com.google.android.googlequicksearchbox",
         "com.google.android.apps.assistant"

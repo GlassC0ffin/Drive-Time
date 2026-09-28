@@ -7,7 +7,7 @@ html, body {
   min-height: 100%;
   height: 100%;
   font-family: Arial, Helvetica, sans-serif;
-  background: linear-gradient(180deg, #08131f 0%, #0a1727 100%);
+  background: #02050a;
   color: #eaf4ff;
 }
 
@@ -15,16 +15,32 @@ body {
   display: grid;
   place-items: center;
   padding: 24px;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(176, 102, 255, 0.45), transparent 22%),
+    radial-gradient(circle at 82% 20%, rgba(54, 199, 255, 0.35), transparent 24%),
+    radial-gradient(circle at 52% 76%, rgba(255, 92, 178, 0.14), transparent 26%),
+    linear-gradient(180deg, #010507 0%, #090b18 38%, #190b1f 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 32px),
+    linear-gradient(0deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 32px);
+  opacity: 0.35;
+  pointer-events: none;
 }
 
 .phone-shell {
   width: min(100%, 390px);
   height: 760px;
-  background: #101b2e;
-  border: 2px solid rgba(205, 226, 255, 0.2);
+  background: linear-gradient(180deg, #04070d 0%, #0d1120 100%);
+  border: 2px solid rgba(143, 224, 255, 0.45);
   border-radius: 30px;
   overflow: hidden;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 30px 60px rgba(0, 0, 0, 0.75), 0 0 42px rgba(173, 104, 255, 0.28), 0 0 18px rgba(78, 220, 255, 0.2);
 }
 
 .status-bar {
@@ -46,14 +62,45 @@ body {
 }
 
 .screen-card {
+  position: relative;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: rgba(17, 36, 54, 0.85);
-  border: 1px solid rgba(170, 205, 255, 0.18);
+  background: linear-gradient(180deg, rgba(8, 11, 18, 0.88), rgba(24, 10, 35, 0.92));
+  border: 1px solid rgba(128, 211, 255, 0.2);
   border-radius: 24px;
-  padding: 22px 18px;
+  padding: 18px 18px 12px;
+  color: #f0f8ff;
+  box-shadow: inset 0 0 20px rgba(255,255,255,0.1), 0 18px 30px rgba(0,0,0,0.2);
+  overflow: hidden;
+  gap: 12px;
+}
+
+.screen-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(115deg, rgba(255,255,255,0.08), transparent 28%, rgba(0,255,255,0.08) 52%, transparent 78%),
+    repeating-linear-gradient(
+      180deg,
+      rgba(255,255,255,0.04) 0 2px,
+      rgba(255,255,255,0) 2px 3px
+    );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.screen-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -15% -12% auto;
+  width: 190px;
+  height: 190px;
+  background: radial-gradient(circle, rgba(117, 246, 255, 0.28), transparent 62%);
+  filter: blur(12px);
+  pointer-events: none;
 }
 
 .topline {
@@ -67,24 +114,28 @@ body {
   display: inline-block;
   padding: 7px 10px;
   border-radius: 999px;
-  background: rgba(96, 203, 172, 0.18);
-  color: #8ceac6;
+  background: rgba(13, 54, 68, 0.08);
+  color: #143a4d;
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  border: 1px solid rgba(13, 54, 68, 0.12);
 }
 
 .title {
   margin: 0;
   font-size: clamp(1.8rem, 4vw, 2.3rem);
   line-height: 1.1;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  letter-spacing: 0.05em;
 }
 
 .subtitle {
   margin: 10px 0 0;
-  color: #bfd0e8;
+  color: #243a4c;
   font-size: 0.95rem;
   line-height: 1.5;
+  font-weight: 600;
 }
 
 .actions {
@@ -96,7 +147,9 @@ body {
 .primary-btn,
 .secondary-btn,
 .ghost-btn,
-.utility-btn {
+.utility-btn,
+.mini-btn,
+.drive-mode-pill {
   border: none;
   border-radius: 16px;
   font-size: 1rem;
@@ -109,30 +162,319 @@ body {
 .primary-btn:hover,
 .secondary-btn:hover,
 .ghost-btn:hover,
-.utility-btn:hover {
+.utility-btn:hover,
+.mini-btn:hover,
+.drive-mode-pill:hover {
   transform: translateY(-1px);
 }
 
 .primary-btn {
-  background: linear-gradient(135deg, #5ee6a4, #3bc2ff);
-  color: #062035;
+  background: linear-gradient(135deg, #7b58ff, #38d8ff);
+  color: #081826;
+  box-shadow: 0 10px 18px rgba(39, 91, 255, 0.28), 0 0 18px rgba(115, 221, 255, 0.22);
 }
 
 .secondary-btn {
-  background: #e7f1ff;
-  color: #0c213a;
+  background: rgba(255,255,255,0.52);
+  color: #102330;
+  border: 1px solid rgba(18, 42, 58, 0.14);
 }
 
 .ghost-btn {
-  background: rgba(255, 255, 255, 0.08);
-  color: #edf7ff;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.22);
+  color: #102330;
+  border: 1px solid rgba(18, 42, 58, 0.12);
 }
 
 .utility-btn {
   background: rgba(242, 156, 89, 0.18);
-  color: #ffd9b5;
+  color: #2f2a1b;
   border: 1px solid rgba(242, 156, 89, 0.24);
+}
+
+.cyber-header-row,
+.cyber-hero,
+.action-stack,
+.assistant-panel,
+.emergency-card,
+.friction-grid {
+  width: 100%;
+}
+
+.micro-pill {
+  display: inline-block;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(19, 39, 52, 0.08);
+  border: 1px solid rgba(19, 39, 52, 0.12);
+  color: #11364a;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 800;
+}
+
+.warning-pill {
+  background: rgba(146, 73, 26, 0.08);
+  border-color: rgba(146, 73, 26, 0.14);
+  color: #704114;
+}
+
+.emergency-pill {
+  background: rgba(124, 25, 44, 0.08);
+  border-color: rgba(124, 25, 44, 0.14);
+  color: #6d1123;
+}
+
+.cyber-hero {
+  display: grid;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.cyber-kicker {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(17, 32, 42, 0.68);
+  font-weight: 700;
+}
+
+.cyber-title {
+  margin: 0;
+  font-size: clamp(2.2rem, 4vw, 3rem);
+  line-height: 0.96;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  letter-spacing: 0.06em;
+  color: #0e1d2a;
+}
+
+.action-stack {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.cyber-btn {
+  width: 100%;
+  border-radius: 18px;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  letter-spacing: 0.04em;
+}
+
+.assistant-panel,
+.emergency-card {
+  margin-top: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.assistant-row,
+.contact-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  background: rgba(255,255,255,0.38);
+  border: 1px solid rgba(16, 34, 46, 0.12);
+  border-radius: 16px;
+  color: #102330;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+}
+
+.assistant-row span,
+.contact-row span {
+  font-size: 1.05rem;
+}
+
+.assistant-row strong,
+.contact-row strong {
+  font-size: 0.86rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.friction-copy {
+  margin-top: 14px;
+}
+
+.friction-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.danger-btn {
+  background: linear-gradient(135deg, #4a1d2a, #7d243d);
+}
+
+.assistant-screen,
+.emergency-screen,
+.friction-screen,
+.end-screen {
+  background: linear-gradient(180deg, #edf3fb 0%, #c7d7e5 100%);
+  color: #0f1e2a;
+}
+
+.drive-hud-screen {
+  background: linear-gradient(180deg, rgba(12, 14, 24, 0.92), rgba(35, 15, 50, 0.98));
+  border: none;
+  color: #eefaff;
+  padding: 14px 18px 18px;
+  box-shadow: inset 0 0 18px rgba(173, 104, 255, 0.18), 0 0 25px rgba(75, 90, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+}
+
+.drive-hud-screen .drive-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.drive-hud-screen .restricted-pill {
+  margin-top: 12px;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+.drive-hud-screen .end-drive-pill {
+  margin-top: auto;
+  margin-bottom: 0;
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.drive-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: rgba(18, 18, 18, 0.6);
+  text-transform: uppercase;
+  padding-top: 6px;
+}
+
+.drive-title-wrap {
+  display: grid;
+  place-items: center;
+  margin-top: 12px;
+  margin-bottom: 18px;
+}
+
+.drive-title {
+  margin: 0;
+  font-size: clamp(2.3rem, 5vw, 4rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  font-weight: 800;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  text-transform: uppercase;
+  color: #edfaff;
+  text-shadow: 0 0 14px rgba(109, 233, 255, 0.45), 0 0 30px rgba(175, 102, 255, 0.18);
+}
+
+.live-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: clamp(1.1rem, 2vw, 1.8rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  color: #75f6ff;
+}
+
+.live-dot {
+  width: 16px;
+  height: 16px;
+  background: #ff2d55;
+  border-radius: 50%;
+  box-shadow: 0 0 14px rgba(255, 45, 85, 0.8);
+}
+
+.drive-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.cyber-tile {
+  position: relative;
+  min-height: 148px;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 24px;
+  color: #f0f7ff;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  box-shadow: inset 0 0 20px rgba(255,255,255,0.12), 0 0 28px rgba(137, 82, 255, 0.25), 0 0 18px rgba(72, 214, 255, 0.16);
+}
+
+.cyber-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0));
+  pointer-events: none;
+}
+
+.cyber-tile span {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(1.4rem, 2vw, 2.15rem);
+}
+
+.maps-tile {
+  background: linear-gradient(135deg, rgba(108, 201, 255, 0.9), rgba(34, 127, 255, 0.85));
+}
+
+.music-tile {
+  background: linear-gradient(135deg, rgba(206, 123, 255, 0.94), rgba(146, 92, 255, 0.82));
+}
+
+.assistant-tile {
+  grid-column: 1 / -1;
+  min-height: 120px;
+  background: linear-gradient(135deg, rgba(9, 24, 38, 0.94), rgba(48, 168, 221, 0.88));
+  color: rgba(255,255,255,0.9);
+}
+
+.emergency-tile {
+  grid-column: 1 / -1;
+  min-height: 118px;
+  background: linear-gradient(135deg, rgba(137, 19, 57, 0.82), rgba(255, 81, 118, 0.78));
+}
+
+.restricted-pill,
+.end-drive-pill {
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.7);
+  color: #111111;
+  font-size: clamp(1rem, 2vw, 1.45rem);
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  padding: 16px 18px;
+  margin-top: 18px;
+  box-shadow: inset 0 0 16px rgba(255,255,255,0.3), 0 12px 16px rgba(0,0,0,0.08);
+}
+
+.end-drive-pill {
+  margin-top: 18px;
+  background: rgba(255,255,255,0.72);
 }
 
 .grid {
@@ -178,4 +520,285 @@ body {
 
 .hidden {
   display: none;
+}
+
+.music-screen {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255,255,255,0.16), transparent 25%),
+    linear-gradient(180deg, rgba(11, 12, 28, 0.98), rgba(47, 18, 63, 0.96));
+  color: #f5fbff;
+  border: none;
+  padding-top: 18px;
+  justify-content: flex-start;
+  overflow: hidden;
+  box-shadow: inset 0 0 24px rgba(180, 111, 255, 0.18);
+  display: flex;
+  flex-direction: column;
+}
+
+.music-screen .player-controls {
+  margin-bottom: 8px;
+}
+
+.music-screen .drive-mode-pill {
+  margin-top: auto;
+  margin-bottom: 0;
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.music-header {
+  text-align: center;
+  margin-top: 8px;
+}
+
+.music-title {
+  font-size: 3.2rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  font-weight: 700;
+}
+
+.music-subtitle {
+  margin-top: 8px;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.vinyl-panel {
+  display: grid;
+  place-items: center;
+  padding: 24px 0 18px;
+}
+
+.vinyl-disc {
+  position: relative;
+  width: 270px;
+  height: 270px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, rgba(255,255,255,0.18) 0 11%, rgba(0,0,0,0.8) 12% 15%, rgba(0,0,0,0.94) 16% 59%, rgba(41,41,41,0.95) 60% 68%, rgba(11,11,11,0.98) 69% 100%);
+  border: 12px solid rgba(255,255,255,0.22);
+  box-shadow:
+    inset 0 0 28px rgba(255,255,255,0.12),
+    0 0 52px rgba(184, 90, 255, 0.4),
+    0 0 20px rgba(95, 214, 255, 0.2),
+    0 12px 26px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+
+.vinyl-disc::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle at center,
+    rgba(255,255,255,0.06) 0 2px,
+    rgba(0,0,0,0.02) 2px 4px
+  );
+}
+
+.vinyl-disc.is-spinning {
+  animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.vinyl-label {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  width: 94px;
+  height: 94px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f5f5f5, #d4d4d4);
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  border: 4px solid rgba(0,0,0,0.26);
+  box-shadow: inset 0 0 12px rgba(255,255,255,0.7);
+  z-index: 2;
+}
+
+.track-block {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.track-name {
+  font-size: 2.2rem;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  line-height: 1.2;
+}
+
+.track-artist {
+  margin-top: 8px;
+  font-size: 1.6rem;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  font-weight: 600;
+}
+
+.progress-bar {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background: rgba(30, 30, 30, 0.18);
+  border-radius: 999px;
+  margin-top: 18px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  display: block;
+  width: 48%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #5da9ff, #7dd3fc);
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.mini-btn {
+  background: transparent;
+  color: #111111;
+  padding: 8px 10px;
+  font-size: 1.8rem;
+  border: none;
+  line-height: 1;
+}
+
+.play-btn {
+  background: rgba(17,17,17,0.08);
+  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+}
+
+.drive-mode-pill {
+  width: 100%;
+  margin-top: 22px;
+  background: rgba(255,255,255,0.58);
+  color: #111111;
+  border: 1px solid rgba(0,0,0,0.1);
+  font-size: 1.2rem;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  letter-spacing: 0.04em;
+  padding: 16px 18px;
+  border-radius: 999px;
+}
+
+.maps-screen {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(144, 222, 255, 0.28), transparent 22%),
+    linear-gradient(180deg, rgba(11, 20, 28, 0.98), rgba(40, 31, 66, 0.96));
+  color: #f6fbff;
+  border: none;
+  padding: 18px 18px 20px;
+  justify-content: flex-start;
+  overflow: hidden;
+  box-shadow: inset 0 0 18px rgba(98, 197, 255, 0.12), 0 0 24px rgba(126, 76, 255, 0.19);
+  display: flex;
+  flex-direction: column;
+}
+
+.maps-screen .drive-mode-pill {
+  margin-top: auto;
+  margin-bottom: 0;
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.maps-header {
+  text-align: center;
+  font-size: 3.15rem;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  margin-top: 10px;
+}
+
+.map-card {
+  width: 100%;
+  height: 350px;
+  margin-top: 18px;
+  background: linear-gradient(135deg, rgba(170, 222, 255, 0.88), rgba(209, 224, 255, 0.72));
+  border-radius: 28px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 0 18px rgba(255,255,255,0.2), 0 0 30px rgba(107, 177, 255, 0.2);
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+.map-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,0.08) 0 1px,
+      rgba(255,255,255,0) 1px 28px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,0.08) 0 1px,
+      rgba(255,255,255,0) 1px 28px
+    );
+  opacity: 0.7;
+}
+
+.map-grid {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.7) 0 2%, transparent 2.5%),
+    radial-gradient(circle at 62% 22%, rgba(255,255,255,0.6) 0 2.3%, transparent 2.8%),
+    radial-gradient(circle at 80% 66%, rgba(255,255,255,0.6) 0 2.1%, transparent 2.6%),
+    linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.04) 100%);
+}
+
+.turn-box {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.turn-label {
+  font-size: 2.2rem;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+}
+
+.turn-text {
+  margin-top: 10px;
+  font-size: 1.9rem;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+}
+
+.turn-meta {
+  margin-top: 8px;
+  font-size: 1.5rem;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+}
+
+.maps-pill {
+  margin-top: 18px;
+  background: rgba(255,255,255,0.7);
 }

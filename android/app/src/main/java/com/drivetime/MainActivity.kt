@@ -1,10 +1,15 @@
 package com.drivetime
 
+import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -23,17 +28,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,23 +69,95 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DriveTimeApp() {
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
     val stateManager = remember { DriveStateManager() }
     val frictionController = remember { FrictionController() }
     val emergencyService = remember { EmergencyContactService() }
-    val emergencyContacts = remember { emergencyService.getEmergencyContacts() }
+    val spotifyTracker = remember { SpotifyMediaTracker(context.applicationContext) }
+    val prefs = remember { context.getSharedPreferences("drive_time_prefs", Context.MODE_PRIVATE) }
+    val allEmergencyContacts = remember { emergencyService.getEmergencyContacts(context.applicationContext) }
+    var emergencyContacts by remember { mutableStateOf(allEmergencyContacts) }
+    val initialSelectedEmergencyNames = remember {
+        prefs.getStringSet("selected_emergency_contacts", emptySet())?.toMutableSet() ?: mutableSetOf()
+    }
+    var selectedEmergencyContacts by remember { mutableStateOf(initialSelectedEmergencyNames.toList()) }
+    val requestContactPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { granted ->
+            if (granted) {
+                emergencyContacts = emergencyService.getEmergencyContacts(context.applicationContext)
+                selectedEmergencyContacts = prefs.getStringSet("selected_emergency_contacts", emptySet())?.toList() ?: emptyList()
+            }
+        }
+    )
+    val contactPermissionGranted = remember(context) {
+        context.checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED
+    }
     var driveState by remember { mutableStateOf(DriveState.IDLE) }
     var settings by remember { mutableStateOf(DriveSettings()) }
     var showSettings by remember { mutableStateOf(false) }
+    var showEndDriveConfirm by remember { mutableStateOf(false) }
     var vehicleConnected by remember { mutableStateOf(false) }
     var activeWidget by remember { mutableStateOf<String?>(null) }
     var mediaPlaying by remember { mutableStateOf(false) }
-
-    val mediaTitle = "All They Wanted"
-    val mediaArtist = "Panchiko"
+    var currentTrack by remember { mutableStateOf<Pair<String, String>?>(null) }
 
     fun updateState(state: DriveState) {
         driveState = state
         stateManager.setState(state)
+        if (state == DriveState.IDLE) {
+            showEndDriveConfirm = false
+        }
+    }
+
+    LaunchedEffect(driveState, settings) {
+        val track = spotifyTracker.getCurrentTrack()
+        currentTrack = track
+        mediaPlaying = track != null
+    }
+
+    LaunchedEffect(driveState, settings.restrictedApps) {
+        if (driveState != DriveState.DRIVING) return@LaunchedEffect
+
+        while (driveState == DriveState.DRIVING) {
+            val foregroundPackage = spotifyTracker.getForegroundPackage() ?: break
+            val checker = AppRestrictionChecker(settings.restrictedApps.toSet())
+
+            if (checker.isRestricted(foregroundPackage)) {
+                stateManager.onRestrictedAppAttempt()
+                updateState(stateManager.getState())
+                break
+            }
+
+            delay(2000)
+        }
+    }
+
+    val mediaTitle = currentTrack?.first ?: "No track"
+    val mediaArtist = currentTrack?.second ?: "Spotify"
+
+    fun beginDriveSession() {
+        if (stateManager.canActivateDrive()) {
+            stateManager.startDrive()
+            updateState(stateManager.getState())
+            showEndDriveConfirm = false
+        }
+    }
+
+    fun confirmDriveEnd() {
+        if (stateManager.confirmEndDrive()) {
+            updateState(stateManager.getState())
+            showEndDriveConfirm = false
+        }
+    }
+
+    fun forceExitDrive() {
+        stateManager.forceExitDrive()
+        updateState(DriveState.IDLE)
+        activeWidget = null
+        mediaPlaying = false
+        currentTrack = null
+        showEndDriveConfirm = false
     }
 
     val appLaunchResolver = remember { AppLaunchResolver() }
@@ -134,10 +215,29 @@ fun DriveTimeApp() {
 
     fun openMusic() {
         activeWidget = "music"
+        val spotifyPackage = appLaunchResolver.resolvePackage(appLaunchResolver.candidatesForMusic(), context.packageManager.getInstalledApplications(0).map { it.packageName }.toSet())
+        if (spotifyPackage != null) {
+            launchApp(spotifyPackage)
+            mediaPlaying = true
+            currentTrack = "Spotify" to "Active"
+        } else {
+            mediaPlaying = false
+            currentTrack = null
+        }
     }
 
     fun openMaps() {
         activeWidget = "maps"
+    }
+
+    fun testFriction() {
+        if (stateManager.getState() == DriveState.IDLE) {
+            stateManager.startDrive()
+            updateState(stateManager.getState())
+        }
+
+        stateManager.onRestrictedAppAttempt()
+        updateState(stateManager.getState())
     }
 
     fun openAssistant() {
@@ -168,12 +268,18 @@ fun DriveTimeApp() {
     }
 
     fun callEmergency() {
-        val contact = emergencyContacts.firstOrNull()
+        val selected = emergencyContacts.filter { contact -> selectedEmergencyContacts.contains(contact.name) }
+        val contact = selected.firstOrNull() ?: emergencyContacts.firstOrNull()
         if (contact != null) {
             emergencyService.callEmergencyContact(context, contact)
         } else {
             launchApp(null, action = Intent.ACTION_DIAL)
         }
+    }
+
+    fun saveSelectedEmergencyContacts(updated: List<String>) {
+        selectedEmergencyContacts = updated
+        prefs.edit().putStringSet("selected_emergency_contacts", updated.toSet()).apply()
     }
 
     val bgStart = Color(0xFF050B16)
@@ -199,7 +305,9 @@ fun DriveTimeApp() {
                 .padding(22.dp)
         ) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start
             ) {
@@ -297,7 +405,142 @@ fun DriveTimeApp() {
                             SettingsRow(label = "Music", value = settings.musicApp, labelColor = textSecondary, valueColor = textPrimary)
                             SettingsRow(label = "Maps", value = settings.mapsApp, labelColor = textSecondary, valueColor = textPrimary)
                             SettingsRow(label = "Assistant", value = settings.assistantApp, labelColor = textSecondary, valueColor = textPrimary)
-                            SettingsRow(label = "Emergency", value = settings.emergencyContacts.joinToString(", "), labelColor = textSecondary, valueColor = textPrimary)
+                            SettingsRow(label = "Emergency", value = selectedEmergencyContacts.joinToString(", ").ifBlank { "None selected" }, labelColor = textSecondary, valueColor = textPrimary)
+
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = "Emergency contacts",
+                                color = textPrimary,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            if (!contactPermissionGranted) {
+                                Button(
+                                    onClick = {
+                                        requestContactPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(containerColor = accent),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text("Allow contacts access", color = Color(0xFF0B1020), fontWeight = FontWeight.Bold)
+                                }
+                            } else {
+                                emergencyContacts.forEach { contact ->
+                                    val selected = selectedEmergencyContacts.contains(contact.name)
+                                    Surface(
+                                        onClick = {
+                                            val updated = selectedEmergencyContacts.toMutableList()
+                                            if (selected) updated.remove(contact.name) else updated.add(contact.name)
+                                            saveSelectedEmergencyContacts(updated)
+                                        },
+                                        color = if (selected) Color(0xFF18263F) else Color(0xFF101B2D),
+                                        shape = RoundedCornerShape(12.dp),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, if (selected) accent else border),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 3.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = contact.name,
+                                                color = textPrimary,
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                            Text(
+                                                text = if (selected) "Selected" else "Add",
+                                                color = if (selected) accentWarm else textSecondary,
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = "Restricted apps",
+                                color = textPrimary,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            val installedApps = remember(context.packageManager) {
+                                val visiblePackages = setOf(
+                                    "com.instagram.android",
+                                    "com.zhiliao.musically",
+                                    "com.snapchat.android",
+                                    "com.twitter.android",
+                                    "com.facebook.katana",
+                                    "com.google.android.youtube",
+                                    "com.android.chrome",
+                                    "com.spotify.music",
+                                    "com.google.android.apps.maps",
+                                    "com.google.android.apps.messaging",
+                                    "com.google.android.dialer",
+                                    "com.google.android.apps.googleassistant",
+                                    "com.google.android.apps.gemini",
+                                    "com.google.android.gm",
+                                    "com.android.vending",
+                                    "com.google.android.apps.nexuslauncher",
+                                    "com.google.android.apps.translate"
+                                )
+
+                                context.packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+                                    .mapNotNull { appInfo ->
+                                        val packageName = appInfo.packageName ?: return@mapNotNull null
+                                        if (packageName == context.packageName) return@mapNotNull null
+                                        if (!visiblePackages.contains(packageName)) return@mapNotNull null
+                                        val label = context.packageManager.getApplicationLabel(appInfo).toString()
+                                        packageName to label
+                                    }
+                                    .sortedBy { it.second.lowercase() }
+                            }
+
+                            installedApps.forEach { (appPackage, appLabel) ->
+                                val selected = settings.restrictedApps.contains(appPackage)
+                                Surface(
+                                    onClick = {
+                                        val updated = settings.restrictedApps.toMutableList()
+                                        if (selected) updated.remove(appPackage) else updated.add(appPackage)
+                                        settings = settings.copy(restrictedApps = updated)
+                                    },
+                                    color = if (selected) Color(0xFF18263F) else Color(0xFF101B2D),
+                                    shape = RoundedCornerShape(12.dp),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, if (selected) accent else border),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 3.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = appLabel.ifBlank { appPackage },
+                                            color = textPrimary,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                        Text(
+                                            text = if (selected) "Blocked" else "Allow",
+                                            color = if (selected) accentWarm else textSecondary,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
 
                             Spacer(modifier = Modifier.height(14.dp))
                             Button(
@@ -371,12 +614,7 @@ fun DriveTimeApp() {
 
                 if (driveState == DriveState.IDLE) {
                     Button(
-                        onClick = {
-                            if (stateManager.canActivateDrive()) {
-                                stateManager.startDrive()
-                                updateState(stateManager.getState())
-                            }
-                        },
+                        onClick = { beginDriveSession() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(62.dp),
@@ -392,10 +630,120 @@ fun DriveTimeApp() {
                             fontSize = 18.sp
                         )
                     }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = { testFriction() },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1D3557)),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text("Test friction screen", color = textPrimary, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                if (showEndDriveConfirm) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Surface(
+                        color = Color(0xFF101E35),
+                        shape = RoundedCornerShape(18.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFB7185)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Text(
+                                text = "End drive?",
+                                color = textPrimary,
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "This will close the active driving session and return the app to a safe, idle state.",
+                                color = textSecondary,
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Button(
+                                    onClick = { showEndDriveConfirm = false },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(containerColor = surfaceAlt),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text("Cancel", color = textPrimary)
+                                }
+                                Button(
+                                    onClick = { confirmDriveEnd() },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF312E81)),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text("End drive", color = textPrimary, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if (driveState == DriveState.DRIVING) {
-                    if (activeWidget == "music" && mediaPlaying) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color(0xFF0F1C2F),
+                        shape = RoundedCornerShape(18.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, border)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 14.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                                Text(
+                                    text = "Drive focus",
+                                    color = faded,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = 0.8.sp
+                                )
+                                Text(
+                                    text = "Music • Maps • Assistant",
+                                    color = textPrimary,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(7.dp)
+                                        .background(if (vehicleConnected) Color(0xFF34D399) else Color(0xFF64748B), RoundedCornerShape(50))
+                                )
+                                Text(
+                                    text = if (vehicleConnected) "Connected" else "Ready",
+                                    color = if (vehicleConnected) accent else textSecondary,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    if (activeWidget == "music") {
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
                             color = Color(0xFF101D34),
@@ -424,7 +772,7 @@ fun DriveTimeApp() {
                                 ) {
                                     Column {
                                         Text(
-                                            text = "Now playing",
+                                            text = if (mediaPlaying) "Spotify status" else "Spotify status",
                                             color = faded,
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.SemiBold,
@@ -432,7 +780,7 @@ fun DriveTimeApp() {
                                         )
                                         Spacer(modifier = Modifier.height(4.dp))
                                         Text(
-                                            text = "$mediaArtist · $mediaTitle",
+                                            text = if (mediaPlaying) "Spotify active" else "Spotify idle",
                                             color = textPrimary,
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Bold
@@ -461,12 +809,16 @@ fun DriveTimeApp() {
                                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
                                     Button(
-                                        onClick = { mediaPlaying = !mediaPlaying },
+                                        onClick = {
+                                            mediaPlaying = spotifyTracker.isSpotifyActive()
+                                            currentTrack = if (mediaPlaying) "Spotify" to "Active" else null
+                                            activeWidget = "music"
+                                        },
                                         modifier = Modifier.weight(1f),
                                         colors = ButtonDefaults.buttonColors(containerColor = surfaceAlt),
                                         shape = RoundedCornerShape(12.dp)
                                     ) {
-                                        Text(if (mediaPlaying) "Pause" else "Play", color = textPrimary)
+                                        Text("Refresh", color = textPrimary)
                                     }
                                     Button(
                                         onClick = { openFullApp("music") },
@@ -494,7 +846,7 @@ fun DriveTimeApp() {
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 Text("Maps", color = textPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                                Text("Home · 8 min", color = textSecondary, fontSize = 13.sp)
+                                Text("Route · 8 min away", color = textSecondary, fontSize = 13.sp)
                                 Button(
                                     onClick = { openFullApp("maps") },
                                     modifier = Modifier.fillMaxWidth(),
@@ -519,7 +871,7 @@ fun DriveTimeApp() {
                                 modifier = Modifier.padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Text("Gemini assistant", color = textPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                                Text("Gemini Assistant", color = textPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                                 Text("Ready to help with calls, routes, and quick prompts.", color = textSecondary, fontSize = 13.sp)
                                 Button(
                                     onClick = { openFullApp("assistant") },
@@ -540,18 +892,25 @@ fun DriveTimeApp() {
                     ) {
                         DashboardTile(
                             title = "Music",
-                            subtitle = "Queue · 2 tracks",
-                            actionText = "Play",
+                            subtitle = if (mediaPlaying) "Spotify active" else "Spotify idle",
+                            actionText = if (mediaPlaying) "Play" else "Open",
                             accentColor = accent,
                             modifier = Modifier.weight(1f),
-                            onClick = { openMusic(); mediaPlaying = true }
+                            iconGlyph = "♫",
+                            onClick = {
+                                openMusic()
+                                val track = spotifyTracker.getCurrentTrack()
+                                currentTrack = track
+                                mediaPlaying = track != null
+                            }
                         )
                         DashboardTile(
                             title = "Maps",
-                            subtitle = "Home · 8 min",
+                            subtitle = "Route · 8 min away",
                             actionText = "Nav",
                             accentColor = accent2,
                             modifier = Modifier.weight(1f),
+                            iconGlyph = "↗",
                             onClick = { openMaps() }
                         )
                     }
@@ -564,10 +923,11 @@ fun DriveTimeApp() {
                     ) {
                         DashboardTile(
                             title = "Assistant",
-                            subtitle = "Call mom",
+                            subtitle = "Gemini",
                             actionText = "Ask",
                             accentColor = accent,
                             modifier = Modifier.weight(1f),
+                            iconGlyph = "✦",
                             onClick = { openAssistant() }
                         )
                         DashboardTile(
@@ -576,8 +936,9 @@ fun DriveTimeApp() {
                             actionText = "Dial",
                             accentColor = accentWarm,
                             modifier = Modifier.weight(1f),
+                            iconGlyph = "☎",
                             onClick = {
-                                emergencyService.callEmergencyContact(context, emergencyContacts.first())
+                                callEmergency()
                             }
                         )
                     }
@@ -660,15 +1021,11 @@ fun DriveTimeApp() {
                             }
 
                             Button(
-                                onClick = {
-                                    if (stateManager.confirmEndDrive()) {
-                                        updateState(stateManager.getState())
-                                    }
-                                },
+                                onClick = { showEndDriveConfirm = true },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF312E81)),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
-                                Text("End Drive", color = textPrimary)
+                                Text("End drive", color = textPrimary, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -710,7 +1067,12 @@ fun DriveTimeApp() {
                                     actionText = "Open",
                                     accentColor = accent,
                                     modifier = Modifier.weight(1f),
-                                    onClick = { openMusic() }
+                                    iconGlyph = "♫",
+                                    onClick = {
+                                        openMusic()
+                                        stateManager.setState(DriveState.DRIVING)
+                                        updateState(stateManager.getState())
+                                    }
                                 )
                                 DashboardTile(
                                     title = "Maps",
@@ -718,8 +1080,46 @@ fun DriveTimeApp() {
                                     actionText = "Open",
                                     accentColor = accent2,
                                     modifier = Modifier.weight(1f),
-                                    onClick = { openMaps() }
+                                    iconGlyph = "↗",
+                                    onClick = {
+                                        openMaps()
+                                        stateManager.setState(DriveState.DRIVING)
+                                        updateState(stateManager.getState())
+                                    }
                                 )
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Button(
+                                    onClick = {
+                                        openAssistant()
+                                        stateManager.setState(DriveState.DRIVING)
+                                        updateState(stateManager.getState())
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(containerColor = accent),
+                                    shape = RoundedCornerShape(16.dp)
+                                ) {
+                                    Text("Assistant", color = Color(0xFF0B1020), fontWeight = FontWeight.Bold)
+                                }
+
+                                Button(
+                                    onClick = {
+                                        callEmergency()
+                                        stateManager.setState(DriveState.DRIVING)
+                                        updateState(stateManager.getState())
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(containerColor = accentWarm),
+                                    shape = RoundedCornerShape(16.dp)
+                                ) {
+                                    Text("Emergency", color = Color(0xFF0B1020), fontWeight = FontWeight.Bold)
+                                }
                             }
 
                             Spacer(modifier = Modifier.height(10.dp))
@@ -736,6 +1136,19 @@ fun DriveTimeApp() {
                                 shape = RoundedCornerShape(16.dp)
                             ) {
                                 Text("Return to safe home", color = textPrimary)
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Button(
+                                onClick = { showEndDriveConfirm = true },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(52.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF312E81)),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Text("End drive", color = textPrimary)
                             }
                         }
                     }
@@ -802,6 +1215,7 @@ private fun DashboardTile(
     actionText: String,
     accentColor: Color,
     modifier: Modifier = Modifier,
+    iconGlyph: String = title.take(1),
     onClick: () -> Unit
 ) {
     Surface(
@@ -831,10 +1245,10 @@ private fun DashboardTile(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = title.take(1),
+                        text = iconGlyph,
                         color = Color(0xFF0B1020),
                         fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
+                        fontSize = if (iconGlyph.length > 1) 12.sp else 14.sp
                     )
                 }
                 Text(
